@@ -1,0 +1,154 @@
+<div class="input-group">
+  <span class="input-group-addon">起始日期</span>
+  <input id="finance_date_start" type="text" readonly class="form-control form-date" placeholder="" value="{{datestr}}"/> 
+  <span class="input-group-addon">结束日期</span>
+  <input id="finance_date" type="text" readonly class="form-control form-date" placeholder="" value="{{dateendstr}}"/> 
+  <span class="input-group-addon">版本</span>
+  <input id="finance_version" type="text" class="form-control" placeholder="" value="{{versionstr}}"/> 
+
+  <span class="input-group-btn">
+    <button id="finance_search" class="btn btn-default" data-url="/finance/list?" type="button">搜索</button>
+  </span>
+  <span class="input-group-btn">
+    <button id="finance_download" class="btn btn-default" type="button">下载结果</button>
+  </span>
+  <span class="input-group-addon">V：只统计通关玩家， X：只统计未通关玩家</span>
+</div>
+<div class="chart-canvas">
+<canvas id="myChart" width="100%" height="300" style="width:100%;height:300px"></canvas>
+</div>
+<table id="user_table" class="table datatable table-striped table-bordered">
+  <thead>
+    <tr>
+      <th data-type="number">关卡ID</th>
+      <th data-type="number">结束次数</th>
+      <th data-type="number">通关次数</th>
+      <th data-type="number">失败次数</th>
+      <th data-type="number">退出次数</th>
+      <th data-type="number">通关率%</th>
+      <th data-type="number">非付费通关率%</th>
+      <th data-type="number">通关率指标</th>
+      <th data-type="number">平均星级(V)</th>
+      <th data-type="number">平均步数(V)</th>
+      <th data-type="number">平均技能(V)</th>
+      <th data-type="number">目标完成率%(X)</th>
+      <th data-type="number">buyClimber</th>
+      <th data-type="number">extraMove</th>
+      {% for f in extraFields %}
+      <th data-type="number">{{f}}</th>
+      {% end %}
+    </tr>
+  </thead>
+  <tbody>
+  {% for u in datas %}
+      <tr>
+          <td>{{u.get("level")}}</td>
+          <td>{{u.get("end_times")}}</td>
+          <td>{{u.get("win_times")}}</td>
+          <td>{{u.get("lose_times")}}</td>
+          <td>{{u.get("stop_times")}}</td>
+          <td><font color="blue">{{"%12.1f" % (u.get("avg_comp")) if u.get("avg_comp") != None else ""}}</font></td>
+          <td><font color="green">{{"%12.1f" % (u.get("avg_comp_n")) if u.get("avg_comp_n") != None else ""}}</font></td>
+          <td><font color="red">{{u.get("comp")}}</font></td>
+          <td>{{"%12.2f" % (u.get("avg_stars")) if u.get("avg_stars") != None else ""}}</td>
+          <td>{{"%12.1f" % (u.get("avg_steps")) if u.get("avg_steps") != None else ""}}</td>
+          <td>{{"%12.1f" % (u.get("avg_skills")) if u.get("avg_skills") != None else ""}}</td>
+          <td>{{"%12.1f" % (u.get("avg_targets")) if u.get("avg_targets") != None else ""}}</td>
+          <td>{{u.get("buyClimber")}}</td>
+          <td>{{u.get("extraMove")}}</td>
+          {% for f in extraFields %}
+              <td>{{u.get(f)}}</td>
+          {% end %}
+      </tr>
+  {% end %}
+  </tbody>
+</table>
+
+<script>
+$('#finance_search').click(function(){
+    current_module_url = $(this).attr('data-url') + "date=" + $('#finance_date_start').val()+"&date_end=" + $('#finance_date').val()+"&version="+ $('#finance_version').val();
+    loadModule();
+});
+
+$('#finance_download').click(function(){
+    data = [];
+    var $rows = $("#user_table").find('tr:has(td),tr:has(th)');
+    var tmpColDelim = String.fromCharCode(11);
+    var tmpRowDelim = String.fromCharCode(0);
+    var colDelim = '","';
+    var rowDelim = '"\r\n"';
+    var csv = '"' + $rows.map(function (i, row) {
+            var $row = $(row), $cols = $row.find('td,th');
+
+            return $cols.map(function (j, col) {
+                var $col = $(col), text = $col.text();
+
+                return text.replace(/"/g, '""'); // escape double quotes
+
+            }).get().join(tmpColDelim);
+
+        }).get().join(tmpRowDelim)
+            .split(tmpRowDelim).join(rowDelim)
+            .split(tmpColDelim).join(colDelim) + '"';
+
+    var blob = new Blob([csv], {type: "text/csv;charset=utf-8"});
+    saveAs(blob, "level_result_{{datestr}}_{{dateendstr}}_{{versionstr}}.csv");
+});
+
+$('.form-date').datetimepicker(
+{
+    language:  "zh-CN",
+    weekStart: 1,
+    todayBtn:  1,
+    autoclose: 1,
+    todayHighlight: 1,
+    startView: 2,
+    minView: 2,
+    forceParse: 0,
+    todayHighlight: 1,
+    showMeridian: 1,
+    format: "yyyy-mm-dd"
+});
+$('table.datatable').datatable({minColWidth:10, sortable: true});
+
+var data = {
+    labels: [],
+    datasets: 
+    [{
+      label: "平均通关率", 
+      fillColor : "rgba(0,0,205,0.1)",
+      strokeColor : "rgba(0,0,205,1)",
+      pointColor : "rgba(0,0,205,1)",
+      pointStrokeColor : "#fff",
+      data:[]
+     },
+    {
+      label: "非付费通关率", 
+      fillColor : "rgba(0,205,0,0.1)",
+      strokeColor : "rgba(0,205,0,1)",
+      pointColor : "rgba(0,205,0,1)",
+      pointStrokeColor : "#fff",
+      data:[]
+     },
+     {
+      label: "标准通关率",
+      fillColor : "rgba(220,0,0,0.1)",
+      strokeColor : "rgba(255,0,0,1)",
+      pointColor : "rgba(255,0,0,1)",
+      pointStrokeColor : "#fff",
+      data:[]
+     }
+    ]
+};
+
+{% for u in datas %}
+    data.labels.push({{u.get("level")}});
+    data.datasets[0].data.push({{u.get("avg_comp") if u.get("avg_comp") else 0}});
+    data.datasets[1].data.push({{u.get("avg_comp_n") if u.get("avg_comp_n") else 0}});
+    data.datasets[2].data.push({{u.get("comp") if u.get("comp") else 0}});
+{% end %}
+
+var options = {scaleShowGridLines : true ,scaleGridLineColor: "rgba(0,0,0,.1)" ,responsive: true}; // 图表配置项，可以留空来使用默认的配置
+var myBarChart = $('#myChart').lineChart(data, options);
+
+</script>

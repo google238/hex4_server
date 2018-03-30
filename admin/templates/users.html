@@ -1,0 +1,222 @@
+<nav class="navbar navbar-default" role="navigation">
+  <ul class="nav navbar-nav nav-justified">
+    <li><a href="#" class="icon-plus" class="btn " id="btnAddUser" data-toggle="modal" data-target="#dlgadduser"> 添加</a></li>
+  </ul>
+</nav>
+<table id="user_table" class="table datatable table-striped table-bordered">
+  <thead>
+    <tr>
+      <th>用户</th>
+      <th>显示名称</th>
+      <th>邮件地址</th>
+      <th>是否锁定</th>
+      <th>操作</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for u in adm_users %}
+      <tr>
+          <td>{{u.user_id}}</td>
+          <td>{{u.user_name}}</td>
+          <td>{{u.email}}</td>
+          <td>{{u.locked}}</td>
+          <td>
+              <button type="button" user_id="{{u.user_id}}"
+                 user_name="{{u.user_name}}"
+                 user_email="{{u.email}}"
+                 user_pass="{{u.password}}"
+                 user_modules="{{u.module_ids}}"
+                 class="btn usereditbtn text-danger btn-primary"><i class="icon-edit"></i></button>
+              &nbsp;&nbsp;&nbsp;
+              {% if u.locked == 0 %}
+              <button type="button" user_id="{{u.user_id}}"
+                            user_url="/users/lock"
+                            class="btn userlockbtn btn-danger"><i class="icon-lock"></i></button>
+              {% else %}
+              <button type="button" user_id="{{u.user_id}}"
+                            user_url="/users/unlock"
+                            class="btn userlockbtn btn-danger"><i class="icon-unlock-alt"></i></button>
+              {% end %}
+              &nbsp;&nbsp;&nbsp;
+              <button type="button" data-toggle="modal" data-target="#alertConfirmModel"  user_id="{{u.user_id}}" user_url="/users/del" class="btn userdelbtn btn-warning"><i class="icon-trash"></i></button>
+         </td>
+     </tr>
+  {% end %}
+  </tbody>
+</table>
+<div id="dlgadduser" class="modal fade">
+<div class="modal-dialog">
+  <div class="modal-content">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">关闭</span></button>
+      <h4 class="modal-title">添加用户</h4>
+    </div>
+    <div class="modal-body">
+        <form id="user_add_form" action="/users/addcommit" method="post">
+           {% module xsrf_form_html() %}
+            <div class="input-group">
+                <span class="input-group-addon"><i class="icon-user"></i> 用户名称</span>
+                <input name="user" type="text" class="form-control" placeholder="用户名" />
+            </div>
+            <br/>
+            <div class="input-group">
+                <span class="input-group-addon"><i class="icon-key"></i> 输入密码</span>
+                <input name="pass" type="password" class="form-control" placeholder="密码" />
+            </div>
+            <br/>
+            <div class="input-group">
+                <span class="input-group-addon"><i class="icon-key"></i> 确认密码</span>
+                <input name="repass" type="password" class="form-control" placeholder="确认密码" />
+            </div>
+            <br/>
+            <input name="passformer" type="hidden" value="" />
+            <div class="input-group">
+                <span class="input-group-addon"><i class="icon-eye-open"></i> 显示名称</span>
+                <input name="username" type="text" class="form-control" placeholder="显示名称" />
+            </div>
+            <br/>
+            <div class="input-group">
+                <span class="input-group-addon"><i class="icon-inbox"></i> 邮件地址</span>
+                <input name="email" type="text" class="form-control" placeholder="email" />
+            </div>
+           <br/>
+                <input name="battleserv" type="checkbox" checked> 对战服务器</input>
+                <input name="logicserv" type="checkbox" checked> 逻辑服务器</input>
+               <input name="dataserv" type="checkbox" checked> 数据服务器 </input>
+               <input name="cacheserv" type="checkbox" checked> 缓存服务器</input>
+           <br/>
+               <input name="apl" type="checkbox" checked> 审查设置</input>
+               <input name="guestmsg" type="checkbox" checked> 客服消息</input>
+               <input name="activity" type="checkbox" checked> 活动管理</input>
+               <input name="mainten" type="checkbox" checked> 服务器管理</input>
+               <input name="notice" type="checkbox" checked> 通知管理</input>
+               <input name="pushmsg" type="checkbox" checked> 推送消息</input>
+               <input name="gift" type="checkbox" checked> 玩家奖励</input>
+               <input name="player" type="checkbox" checked> 玩家管理</input>
+               <input name="payment" type="checkbox" checked> 付费查询</input>
+               <input name="finance" type="checkbox" checked> 关卡统计</input>
+               <input name="pic" type="checkbox" checked> 拼图统计</input>
+               <input name="event" type="checkbox" checked> 活动统计</input>
+               <input name="level" type="checkbox" checked> 关卡分布</input>
+           <br/>
+               <input name="shopcnf" type="checkbox" checked> 商店配置</input>
+               <input name="levelcnf" type="checkbox" checked> 关卡配置</input>
+               <input name="mapcnf" type="checkbox" checked> 地图配置</input>
+               <input name="copycnf" type="checkbox" checked> 副本配置</input>
+               <input name="taskcnf" type="checkbox" checked> 任务配置</input>
+               <input name="gacha" type="checkbox" checked> gacha</input>
+               <input name="avatar" type="checkbox" checked> avatar</input>
+               <input name="ad" type="checkbox" checked> 广告点击</input>
+           <br/>
+           <input name="playerids" type="checkbox" checked> Player ID</input>
+           <input name="playerdatas" type="checkbox" checked> Player Data</input>
+           <input name="playercommands" type="checkbox" checked> Commands</input>
+           <br/>
+               <input name="users" type="checkbox" checked> 用户设置</input>
+        </form>
+        <div id="useralert" class="alert alert-danger">请至少输入用户名密码</div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+      <button type="button" class="btn btn-primary" id="btnAddUserCommit">保存</button>
+    </div>
+  </div>
+</div>
+</div>
+<script>
+$("#btnAddUserCommit").on('click',function(e){
+    var $btn = $(this);
+    var postData = $("#user_add_form").serializeArray();
+    var formURL = $("#user_add_form").attr("action");
+    if($('input[name="user"]').val() == ""){
+         e.preventDefault();
+         $('#useralert').text("用户不能为空!");
+         return;
+    }
+    if($('input[name="pass"]').val() == ""){
+         e.preventDefault();
+         $('#useralert').text("密码不能为空!");
+         return;
+    }
+    if($('input[name="pass"]').val() != $('input[name="repass"]').val()){
+         e.preventDefault();
+         $('#useralert').text("两次输入的密码不一致!");
+         return;
+    }
+    $('#btnAddUser').click();
+
+    $.ajax(
+    {
+            url : formURL,
+            type: "POST",
+            data : postData,
+            success:function(data, textStatus, jqXHR)
+            {
+               setTimeout(  "loadModule()", 500);
+            },
+            error: function(jqXHR, textStatus, errorThrown)
+            {
+            }
+    });
+});
+$("#tmp_dlg").empty();
+$("#dlgadduser").appendTo("#tmp_dlg");
+$('table.datatable').datatable();
+$('button.userdelbtn').click(function(){
+    del_confirm_url = $(this).attr('user_url');
+    del_confirm_id = $(this).attr('user_id');
+    del_confirm_success = function(data){
+       setTimeout("loadModule()", 500);
+    }
+    del_confirm_start = function(data){
+    }
+    del_confirm_error = function(data){
+    }
+    $("#confirm_msg").text("确认要删除当前用户吗？");
+});
+$('button.userlockbtn').click(function(){
+    del_user_url = $(this).attr('user_url');
+    del_user_id = $(this).attr('user_id');
+    var $btn = $(this);
+    $btn.button('loading');
+    $.ajax({
+                   url : del_user_url,
+                   type: "POST",
+                   data : {'user':del_user_id},
+                   success:function(data, textStatus, jqXHR)
+                   {
+
+                      setTimeout("loadModule()", 500);
+                   },
+                   error: function(jqXHR, textStatus, errorThrown)
+                   {
+                   }
+    });
+    setTimeout(function() {
+        $btn.button('reset');
+    }, 1000);
+});
+
+$('button.usereditbtn').click(function(){
+    var $btn = $(this);
+    $('#btnAddUser').click();
+    $('input[name="user"]').val($btn.attr('user_id')).prop('readonly', true);
+    $('input[name="pass"]').val($btn.attr('user_pass'));
+    $('input[name="repass"]').val($btn.attr('user_pass'));
+    $('input[name="passformer"]').val($btn.attr('user_pass'));
+    $('input[name="username"]').val($btn.attr('user_name'));
+    $('input[name="email"]').val($btn.attr('user_email'));
+    var ms = $btn.attr('user_modules').split(',');
+    var ams = ['playerids','playerdatas','playercommands','ad','gacha','avatar','apl', 'level','event', 'pic','activity','battleserv','logicserv', 'dataserv' , 'cacheserv', 'guestmsg' ,'pushmsg' , 'mantain', 'notice', 'gift', 'player', 'payment', 'shopcnf', 'levelcnf' ,'mapcnf' , 'copycnf', 'taskcnf', 'users'];
+    jQuery.each(ams , function(index, el){
+        if(ms.indexOf(el) >=0)
+           $('input[name="'+ el +'"]').prop('checked', true);
+         else
+           $('input[name="'+ el +'"]').removeAttr('checked');
+    });
+});
+
+$('#btnAddUser').click(function(){
+    $('input[name="user"]').val('').prop('readonly', false);
+});
+</script>

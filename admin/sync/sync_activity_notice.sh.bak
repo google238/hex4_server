@@ -1,0 +1,4 @@
+#!/bin/bash
+cp /data/hex4/admin/sync/activity_notice.json /data/hex4/server/config/activity_notice.json
+printf '活动通知配置推送到服务器成功'
+exit 0

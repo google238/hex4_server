@@ -1,0 +1,83 @@
+<div class="input-group">
+  <span class="input-group-addon">日期</span>
+  <input id="ad_date_start" type="text" readonly class="form-control form-date" placeholder="" value="{{datestr}}"/>
+  <span class="input-group-addon">广告入口</span>
+  <select id="ad_date_ui" name="ui" class="form-control" placeholder="全部" >
+      <option value="" {% if ui == '' %}selected="selected"{% end%}>全部</option>
+      <option value="HUD" {% if ui == 'HUD' %}selected="selected"{% end%}>HUD</option>
+      <option value="Prestart" {% if ui == 'Prestart' %}selected="selected"{% end%}>Prestart</option>
+      <option value="GetEnergy" {% if ui == 'GetEnergy' %}selected="selected"{% end%}>GetEnergy</option>
+  </select>
+  <span class="input-group-btn">
+    <button id="ad_search" class="btn btn-default" data-url="/ad/list?" type="button">搜索</button>
+  </span>
+  <span class="input-group-btn">
+    <button id="ad_download" class="btn btn-default" type="button">下载结果</button>
+  </span>
+</div>
+<table id="user_table" class="table datatable table-striped table-bordered">
+  <thead>
+    <tr>
+      <th data-type="string">广告类别</th>
+      <th data-type="string">广告入口</th>
+      <th data-type="number">使用次数</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for u in datas %}
+      <tr>
+          <td>{{u.get("ad_id")}}</td>
+          <td>{{u.get("ad_ui")}}</td>
+          <td>{{u.get("count")}}</td>
+      </tr>
+  {% end %}
+  </tbody>
+</table>
+
+<script>
+$('#ad_search').click(function(){
+    current_module_url = $(this).attr('data-url') + "date=" + $('#ad_date_start').val() + "&ui=" +  $('#ad_date_ui').val();
+    loadModule();
+});
+
+$('#ad_download').click(function(){
+    data = [];
+    var $rows = $("#user_table").find('tr:has(td),tr:has(th)');
+    var tmpColDelim = String.fromCharCode(11);
+    var tmpRowDelim = String.fromCharCode(0);
+    var colDelim = '","';
+    var rowDelim = '"\r\n"';
+    var csv = '"' + $rows.map(function (i, row) {
+            var $row = $(row), $cols = $row.find('td,th');
+
+            return $cols.map(function (j, col) {
+                var $col = $(col), text = $col.text();
+
+                return text.replace(/"/g, '""'); // escape double quotes
+
+            }).get().join(tmpColDelim);
+
+        }).get().join(tmpRowDelim)
+            .split(tmpRowDelim).join(rowDelim)
+            .split(tmpColDelim).join(colDelim) + '"';
+
+    var blob = new Blob([csv], {type: "text/csv;charset=utf-8"});
+    saveAs(blob, "ad_result_{{datestr}}.csv");
+});
+
+$('.form-date').datetimepicker(
+{
+    language:  "zh-CN",
+    weekStart: 1,
+    todayBtn:  1,
+    autoclose: 1,
+    todayHighlight: 1,
+    startView: 2,
+    minView: 2,
+    forceParse: 0,
+    todayHighlight: 1,
+    showMeridian: 1,
+    format: "yyyy-mm-dd"
+});
+$('table.datatable').datatable({minColWidth:10, sortable: true});
+</script>

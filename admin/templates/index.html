@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PIAYA GAME ADMIN</title>
+    <!-- zui -->
+    <link href="/static/css/zui.min.css" rel="stylesheet">
+    <link href="/static/css/jsoneditor.min.css" rel="stylesheet">
+    <link href="/static/lib/datetimepicker/datetimepicker.min.css" rel="stylesheet">
+    <link href="/static/lib/datatable/zui.datatable.min.css" rel="stylesheet">
+    <!-- jQuery (ZUI中的Javascript组件依赖于jQuery) -->
+    <script src="/static/js/jquery-1.12.3.min.js"></script>
+    <!-- ZUI Javascript组件 -->
+    <script src="/static/js/zui.min.js"></script>
+    <script src="/static/js/FileSaver.js"></script>
+    <script src="/static/lib/datatable/zui.datatable.min.js"></script>
+    <script src="/static/lib/datetimepicker/datetimepicker.min.js"></script>
+    <script src="/static/lib/chart/chart.js?v=2"></script>
+    <script src="/static/lib/ace/1.2.8/ace.js"></script>
+    <script src="/static/js/ace-diff.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/static/js/diff_match_patch.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/static/js/jsoneditor.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/static/js/tab.js" type="text/javascript" charset="utf-8"></script>
+    <style>
+    html,body{
+        margin:0px;
+        height:100%;
+        width:100%;
+        padding:0px;
+    }
+    #page {
+        position: fixed;
+        top:60px;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 1000;
+        overflow-y: auto;
+        background-color: #fff;
+    }
+    #pageHeader {
+        position: relative;
+        height: 60px;
+        background-color: #f1f1f1;
+        padding: 5px;
+        border-bottom: 1px solid #e5e5e5;
+    }
+    canvas{
+    }
+#flex-container {
+    display: flex;
+    display: -webkit-flex;
+    flex-direction: row;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+    top: 0px !important;
+    left: 0px;
+
+    /* these 3 lines are to prevents an unsightly scrolling bounce affect on Safari */
+    height: 100%;
+    width: 100%;
+    overflow: auto;
+}
+#flex-container>div {
+    flex-grow: 1;
+    -webkit-flex-grow: 1;
+    position: relative;
+}
+#flex-container>div#gutter {
+    flex: 0 0 60px;
+    -webkit-flex: 0 0 60px;
+    border-left: 1px solid #999999;
+    border-right: 1px solid #999999;
+    background-color: #efefef;
+    overflow: hidden;
+}
+#gutter svg {
+    background-color: #efefef;
+}
+
+#editor1 {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+}
+#editor2 {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+}
+.acediff-diff {
+    background-color: #d8f2ff;
+    border-top: 1px solid #a2d7f2;
+    border-bottom: 1px solid #a2d7f2;
+    position: absolute;
+    z-index: 4;
+}
+.acediff-diff.targetOnly {
+    height: 0px !important;
+    border-top: 1px solid #a2d7f2;
+    border-bottom: 0px;
+    position: absolute;
+}
+.acediff-connector {
+    fill: #d8f2ff;
+    stroke: #a2d7f2;
+}
+
+.acediff-copy-left {
+    float: right;
+}
+.acediff-copy-right,
+.acediff-copy-left {
+    position: relative;
+}
+.acediff-copy-right div {
+    color: #000000;
+    text-shadow: 1px 1px #ffffff;
+    position: absolute;
+    margin: -3px 2px;
+    cursor: pointer;
+}
+.acediff-copy-right div:hover {
+    color: #004ea0;
+}
+.acediff-copy-left div {
+    color: #000000;
+    text-shadow: 1px 1px #ffffff;
+    position: absolute;
+    right: 0px;
+    margin: -3px 2px;
+    cursor: pointer;
+}
+.acediff-copy-left div:hover {
+    color: #c98100;
+}
+.modal-loading {
+    display:    none;
+    position:   fixed;
+    z-index:    20000;
+    top:        0;
+    left:       0;
+    height:     100%;
+    width:      100%;
+    background: rgba( 255, 255, 255, .8 ) 
+                url('http://sampsonresume.com/labs/pIkfp.gif') 
+                50% 50% 
+                no-repeat;
+}
+
+/* When the body has the loading class, we turn
+   the scrollbar off with overflow:hidden */
+body.loading {
+    overflow: hidden;   
+}
+
+/* Anytime the body has the loading class, our
+   modal element will be visible */
+body.loading .modal-loading {
+    display: block;
+}
+    </style>
+
+  </head>
+  <body>
+<div class="modal-loading"></div>
+   <div id="pageHeader" class="wrapper">
+           <nav class="navbar navbar-inverse" role="navigation">
+            <div class="navbar-header">
+               <a class="navbar-brand icon text-icon" href="#">PITAYA(PRD)-{{current_user.user_id}}[{{current_user.user_name}}]</a>
+            </div>
+            <div class="collapse navbar-collapse">
+                 <ul class="nav navbar-nav">
+                 </ul>
+            </div>
+           </nav>
+    </div>
+    <div id="page"class="with-shadow">
+         <div  id="page_content" class = "panel-body" style="overflow: scroll">
+          <div class="row" style="width: 100%; height:100%;">
+            <div class="col col-md-d5 col-sm-6" style="width: 20%;padding:0px;">
+              <nav class="menu" data-toggle="menu">
+                <ul class="nav nav-primary">
+                  <li><a href="#" class="module_trigger" id="dashbord"><i class="icon-th"></i> Dashboard</a></li>
+                  <li>
+                    <a href="#"><i class="icon-server"></i> 服务器管理</a>
+                    <ul class="nav">
+                      {% if battleserv %}
+                      <li><a href="#" class="module_trigger icon-shield" id="battleserv"> 对战服务器</a></li>
+                      {% end %}
+                      {% if logicserv %}
+                      <li><a href="#" class="module_trigger icon-branch" id="logicserv"> 逻辑服务器</a></li>
+                      {% end %}
+                      {% if dataserv %}
+                      <li><a href="#" class="module_trigger icon-cube"   id="dataserv"> 数据服务器</a></li>
+                      {% end %}
+                      {% if cacheserv %}
+                      <li><a href="#" class="module_trigger icon-stack"  id="cacheserv"> 缓存服务器</a></li>
+                      {% end %}
+                    </ul>
+                  </li>
+                  <li>
+                    <a href="#"><i class="icon-heart"></i> 运营工具</a>
+                    <ul class="nav">
+                      {% if apl %}
+                      <li><a href="#" class="module_trigger icon-chat-dot" id="apl"> 审查设置</a></li>
+                      {% end %}
+                      {% if guestmsg %}
+                      <li><a href="#" class="module_trigger icon-chat-dot" id="guestmsg"> 客服消息</a></li>
+                      {% end %}
+                      {% if activity %}
+                      <li><a href="#" class="module_trigger icon-lock" id="activity"> 活动开关配置</a></li>
+                      {% end %}
+                      {% if mainten %}
+                      <li><a href="#" class="module_trigger icon-wrench"   id="mainten"> 服务器管理</a></li>
+                      {% end %}
+                      {% if pushmsg %}
+                      <li><a href="#" class="module_trigger icon-bolt"   id="pushmsg"> 推送消息</a></li>
+                      {% end %}
+                      {% if notice %}
+                      <li><a href="#" class="module_trigger icon-bullhorn" id="notice"> 通知管理</a></li>
+                      {% end %}
+                      {% if gift %}
+                      <li><a href="#" class="module_trigger icon-gift"     id="gift"> 玩家奖励</a></li>
+                      {% end %}
+                      {% if player %}
+                      <li><a href="#" class="module_trigger icon-gamepad"  id="player"> 玩家管理</a></li>
+                      {% end %}
+                      {% if payment %}
+                      <li><a href="#" class="module_trigger icon-dollar"   id="payment" > 付费查询</a></li>
+                      {% end %}
+                      {% if finance %}
+                      <li><a href="#" class="module_trigger icon-dollar"   id="finance" > 关卡统计</a></li>
+                      {% end %}
+                      {% if pic %}
+                      <li><a href="#" class="module_trigger icon-dollar"   id="pic" > 拼图统计</a></li>
+                      {% end %}
+                      {% if event %}
+                      <li><a href="#" class="module_trigger icon-dollar"   id="event" > 活动统计</a></li>
+                      {% end %}
+                      {% if level %}
+                      <li><a href="#" class="module_trigger icon-dollar"   id="level" > 关卡分布</a></li>
+                      {% end %}
+                      {% if gacha %}
+                      <li><a href="#" class="module_trigger icon-dollar"   id="gacha" > gacha统计</a></li>
+                      {% end %}
+                      {% if avatar %}
+                      <li><a href="#" class="module_trigger icon-dollar"   id="avatar" > avatar统计</a></li>
+                      {% end %}
+                      {% if ad %}
+                      <li><a href="#" class="module_trigger icon-dollar"   id="ad" > 广告点击</a></li>
+                      {% end %}
+                      {% if activity %}
+                      <li><a href="#" class="module_trigger icon-dollar"   id="activity_notice" > 活动通知</a></li>
+                      {% end %}
+                    </ul>
+                  </li>
+                  <li>
+                    <a href="#"><i class="icon-cogs"></i> 系统配置</a>
+                    <ul class="nav">
+                      {% if shopcnf %}
+                      <li><a href="#" class="module_trigger icon-diamond"    id="shopcnf"> 商店配置</a></li>
+                      {% end %}
+                      {% if levelcnf %}
+                      <li><a href="#" class="module_trigger icon-usecase"    id="levelcnf"> 关卡配置</a></li>
+                      {% end %}
+                      {% if mapcnf %}
+                      <li><a href="#" class="module_trigger icon-map-marker" id="mapcnf"> 地图配置</a></li>
+                      {% end %}
+                      {% if copycnf %}
+                      <li><a href="#" class="module_trigger icon-sitemap"    id="copycnf"> 副本配置</a></li>
+                      {% end %}
+                      {% if taskcnf %}
+                      <li><a href="#" class="module_trigger icon-tasks"      id="taskcnf"> 任务配置</a></li>
+                      {% end %}
+                    </ul>
+                  </li>
+                  <li>
+                    <a href="#"><i class="icon-cogs"></i> GMTOOL</a>
+                    <ul class="nav">
+                      {% if playerids %}
+                      <li><a href="#" class="module_trigger icon-gamepad"    id="playerids"> Player ID</a></li>
+                      {% end %}
+                      {% if playerdatas %}
+                      <li><a href="#" class="module_trigger icon-usecase"    id="playerdatas"> Player Data</a></li>
+                      {% end %}
+                      {% if playercommands %}
+                      <li><a href="#" class="module_trigger icon-gift" id="playercommands"> Commands</a></li>
+                      {% end %}
+                    </ul>
+                  </li>
+                  <li>
+                    <a href="#"><i class="icon-group"></i> 权限管理</a>
+                    <ul class="nav">
+                      {% if users %}
+                      <li> <a href="#" class="module_trigger icon-user" id="users"> 用户设置</a></li>
+                      {% end %}
+                    </ul>
+                  </li>
+                </ul>
+                <button id="close_btn" class="btn btn-primary " data-position = "center" data-moveable = "true"  data-toggle = "modal"  data-target = "#alertCloseModel"><i class="icon-signout"></i> 退出</button>
+              </nav>
+             </div>
+             <div class="col col-md-d5 col-sm-6" style="width:80%;padding:0px;">
+               <div  class = "panel" style="width:100% ; margin-left:10px;" >
+                 <div  id="module_name" class = "panel-heading" >
+                   Dashboard
+                 </div>
+                 <div  id="module_content" class = "panel-body">
+                 </div>
+               </div>
+             </div>
+          </div>
+         </div>
+   </div>
+  <div class="modal fade" id="alertCloseModel" >
+  <div  class = "modal-dialog" >
+    <div  class = "modal-content" >
+      <div  class = "modal-header" >
+        <button  type = "button"  class = "close"  data-dismiss = "modal" ><span  aria-hidden = "true" > × </span><span  class = "sr-only" > 关闭</span> </button>
+        <h4  class = "modal-title" > 退出</h4>
+      </div>
+      <div  class = "modal-body" >
+        <p> 确认要退出管理后台吗？ </p>
+      </div>
+      <div  class = "modal-footer" >
+        <button  type = "button"  class = "btn btn-default"  data-dismiss = "modal" > 取消</button>
+        <button  id = "close_confirm_btn" type = "button"  class = "btn btn-primary" > 确认</button>
+      </div>
+    </div>
+  </div>
+  </div>
+  <div class="modal fade" id="alertConfirmModel" >
+  <div  class = "modal-dialog" >
+    <div  class = "modal-content" >
+      <div  class = "modal-header" >
+        <button  type = "button"  class = "close"  data-dismiss = "modal" ><span  aria-hidden = "true" > × </span><span  class = "sr-only" > 关闭</span> </button>
+        <h4 id="alert_conform_title" class = "modal-title" > 删除</h4>
+      </div>
+      <div  class = "modal-body" >
+        <p id="confirm_msg"> 确认要删除当前记录吗？ </p>
+      </div>
+      <div  class = "modal-footer" >
+        <button  type = "button"  class = "btn btn-default"  data-dismiss = "modal" > 取消</button>
+        <button  id = "alert_confirm_btn" type = "button"  class = "btn btn-primary" data-dismiss = "modal"> 确认</button>
+      </div>
+    </div>
+  </div>
+  </div>
+  <div id="tmp_dlg">
+  </div>
+    <script>
+           $body = $("body");
+           $(document).ajaxStart(function() { $body.addClass("loading"); } );
+           $(document).ajaxStop(function() { $body.removeClass("loading"); } );
+
+           var current_module_url = '';
+           var current_module_name = '';
+           var del_confirm_url = '';
+           var del_confirm_id = '';
+           var del_confirm_start = function(data){
+           };
+           var del_confirm_success = function(data){
+               setTimeout("loadModule()", 500);
+           };
+           var del_confirm_error = function(data){
+           };
+           function loadModule(){
+             $body.addClass("loading");
+             $("#module_content").load(current_module_url, function(responseTxt, statusTxt, xhr){
+                     $body.removeClass("loading");
+                     if(statusTxt == "success"){
+                       $("#module_name").text(current_module_name);
+                     }
+                     if(statusTxt == "error"){
+                       var myModalTrigger = new $.zui.ModalTrigger({title:"加载错误",custom:"无法加载模块 ["+current_module_name+"]<br/>请检查网络，或者用户权限!"});
+                       myModalTrigger.show();
+                     }
+             });
+
+
+           }
+           $('.module_trigger' ). on ( 'click' ,  function ()  {
+             current_module_name = $(this).text( );
+             current_module_url = "/"+$(this).attr('id')+"/list";
+             loadModule();
+           });
+           $('#close_confirm_btn' ). on ( 'click' ,  function ()  {
+               window.location.href="/logout";
+           });
+           $('#alert_confirm_btn').click(function(){
+             del_confirm_start("");
+             $.ajax({
+                   url : del_confirm_url,
+                   type: "POST",
+                   data : {'id':del_confirm_id},
+                   success:function(data, textStatus, jqXHR)
+                   {
+                      del_confirm_success(data);
+                   },
+                   error: function(jqXHR, textStatus, errorThrown)
+                   {
+                      del_confirm_error("");
+                   }
+             });
+           });
+
+    </script>
+  </body>
+</html>

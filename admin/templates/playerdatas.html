@@ -1,0 +1,141 @@
+<div class="panel-body">
+  <div class="input-group">
+    <span class="input-group-addon">Bucket</span>
+    <select class="form-control" id="player_bucket">
+      <option value="userData" {% if bucket == "userData" %}selected{% end %}>userData</option>
+      <option value="Command" {% if bucket == "Command" %}selected{% end %}>Command</option>
+    </select>
+    <span class="input-group-addon">Player ID</span>
+    <input id="playerid" type="text" class="form-control form-text" placeholder="Player ID" value="{{playerid}}"/>
+    <span class="input-group-btn">
+        <button id="player_search" class="btn btn-default" data-url="/playerdatas/list" type="button">GET</button>
+    </span>
+  </div>
+</div>
+
+{% if datas and datas != "{}" %}
+  <div class="input-group">
+    <span class="input-group-btn">
+        <button id="player_save" class="btn btn-default" type="button">Submit</button>
+        <button id="player_download" class="btn btn-default" type="button">Export</button>
+        <button id="player_upload" class="btn btn-default" type="button">Import</button>
+        <button id="player_changes" class="btn btn-default" type="button">Toggle Diff View</button>
+    </span>
+  </div>
+  <form id="FormUploadExcel" method="post" enctype="multipart/form-data" action="">
+     <input type="file" id="fileconfig" name="fileconfig" size="chars" style="display: block;visibility: hidden;width:0;height:0;" />
+  </form>
+  <div id="editor" style="height:600px;"></div>
+  <div id="flex-container" style="min-height:700px;">
+    <div>
+      <div id="editor1">{{datas}}</div>
+    </div>
+    <div id="gutter"></div>
+    <div>
+       <div id="editor2"></div>
+     </div>
+  </div>
+{% end %}
+<script>
+
+$('#player_search').click(function(){
+    current_module_url = $(this).attr('data-url') + "?bucket="+$('#player_bucket').val()+"&playerid=" + $('#playerid').val();
+    loadModule();
+});
+
+{% if datas and datas != "{}" %}
+var container = document.getElementById("editor");
+var options = {sortObjectKeys: true};
+var editor = new JSONEditor(container, options);
+var differ = new AceDiff({
+    mode: "ace/mode/json",
+    theme: "ace/theme/twilight",
+    left: {
+      id: "editor1",
+      editable: false,
+      copyLinkEnabled: false
+    },
+    right: {
+     id: "editor2",
+     editable: false,
+     copyLinkEnabled: false
+    },
+    classes: {
+     gutterID: "gutter"
+    }
+});
+editor.setText(differ.getEditors().left.getValue());
+editor.expandAll();
+var formerValue = editor.get();
+$('#player_download').click(function(){
+    var blob = new Blob([editor.getText()], {type: "application/json;charset=utf-8"});
+    saveAs(blob, "player-{{playerid}}.json");
+});
+
+$('#player_upload').click(function(){
+   $("#FormUploadExcel").trigger('reset');
+   $("#fileconfig").click();
+});
+
+$('#player_save').click(function(){
+   var value =  JSON.stringify(editor.get(), null, 2);
+   if(JSON.stringify(formerValue, null, 2) == value){
+       return;
+   }
+    del_confirm_url = "/playerdatas/save?bucket={{bucket}}&playerid={{playerid}}";
+    del_confirm_id  =  value;
+    del_confirm_success = function(data){
+       formerValue = editor.get();
+       differ.getEditors().left.setValue(JSON.stringify(formerValue,null,2));
+       differ.getEditors().right.setValue(JSON.stringify(formerValue,null,2));
+       var myModalTrigger = new $.zui.ModalTrigger({title:"info",custom:"Player data changed successful."});
+       myModalTrigger.show();
+    }
+    del_confirm_start = function(data){
+    }
+    del_confirm_error = function(data){
+       var myModalTrigger = new $.zui.ModalTrigger({title:"info",custom:"Player data submit failed."});
+       myModalTrigger.show();
+    }
+    $("#alert_conform_title").text("Confirm");
+    $("#confirm_msg").text("Are your confirm to submit the changes in editor,\nthis operation will cover the player's data");
+    $("#alertConfirmModel").modal();
+});
+
+$("#editor").show();
+$("#flex-container").hide();
+$("#player_changes").click(function(){
+        $("#editor").toggle();
+        $("#flex-container").toggle();
+        differ.getEditors().left.setValue(JSON.stringify(formerValue,null,2));
+        differ.getEditors().right.setValue(JSON.stringify(editor.get(),null,2));
+});
+
+$("#fileconfig").change(function() {
+  if($('#fileconfig')[0].files[0] == "")
+    return;
+
+  var formData = new FormData();
+  formData.append('file', $('#fileconfig')[0].files[0]);
+  $.ajax({
+       url : '/playerdatas/upload',
+       type : 'POST',
+       data : formData,
+       processData: false,  // tell jQuery not to process the data
+       contentType: false,  // tell jQuery not to set contentType
+       complete : function(data) {
+           if(data.status == 200){
+               editor.setText(data.responseText);
+               differ.getEditors().right.setValue(JSON.stringify(editor.get(),null,2));
+               var myModalTrigger = new $.zui.ModalTrigger({title:"info",custom:"Player data import successful, \nYou can cick [Submit Changes] button to apply the changes."});
+               myModalTrigger.show();
+           }else{
+               var myModalTrigger = new $.zui.ModalTrigger({title:"info",custom:"Player data import failed, \nPlease check the json document."});
+               myModalTrigger.show();
+           }
+       }
+  });
+});
+
+{% end %}
+</script>

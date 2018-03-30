@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PIAYA GAME ADMIN</title>
+    <link rel="stylesheet" href="/static/css/jquery-ui.min.css" />
+    <link rel="stylesheet" href="/static/css/jquery-ui.structure.min.css" />
+    <link rel="stylesheet" href="/static/css/jquery-ui.theme.min.css" />
+    <link type="text/css" rel="stylesheet" href="/static/css/jsgrid.min.css" />
+    <link type="text/css" rel="stylesheet" href="/static/css/jsgrid-theme.min.css" />
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        #container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        #left_pane,
+        #right_pane {
+            top: 0;
+            height: 100%;
+            position: absolute;
+            padding: 10px;
+            color: black;
+        }
+
+        #left_pane {
+            width: 15%;
+            left: 0;
+            border-right: 2px solid black;
+            background: url(/static/images/bg.png) center;
+        }
+
+        #right_pane {
+            width: 85%;
+            right: 0;
+            background: url(/static/images/bg.png) center;
+        }
+
+        form {
+            padding: 20px;
+            -moz-border-radius: 4px;
+            -webkit-border-radius: 4px;
+            border-radius: 4px;
+        }
+
+        form label,
+        form input,
+        form button {
+            margin-bottom: 3px;
+            display: block;
+            width: 100%;
+        }
+
+        form input {
+            height: 25px;
+            line-height: 25px;
+            -moz-box-sizing: border-box;
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+
+        form button {
+            cursor: pointer;
+        }
+
+        form .error {
+            color: #ff0000;
+        }
+    </style>
+    <script type="text/javascript" src="/static/js/jquery.js"></script>
+    <script type="text/javascript" src="/static/js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="/static/js/jquery.validate.min.js"></script>
+    <script type="text/javascript" src="/static/js/jsgrid.min.js"></script>
+    <script>
+        current_module = "{{current_module}}";
+        $(function() {
+            $("#left_pane").resizable({
+                handles: 'e',
+                resize: function() {
+                    $("#right_pane").outerWidth($("#container").innerWidth() - $("#left_pane").outerWidth());
+                }
+            });
+            $("#navigator").accordion({
+                active: {{active_menu}},
+                heightStyle: "fill"
+            });
+            $("#content").accordion({
+                heightStyle: "fill"
+            });
+
+            if (current_module != "")
+                $("#module_name").text("[{{current_user.pkey}}]" + $("#" + current_module).text());
+
+            $(".entry").click(function(event) {
+                var active = $("#navigator").accordion("option", "active");
+                location.href = "/?module=" + event.target.id + "&menu=" + active;
+            });
+
+            $("#exitBtn").click(function(event) {
+              $( "#dialog-confirm" ).dialog({
+                 resizable: false,
+                 height: "auto",
+                 width: 400,
+                 modal: true,
+                 buttons: {
+                    "取消": function() {
+                            $( this ).dialog( "close" );
+                     },
+                    "确认": function() {
+                           $( this ).dialog( "close" );
+                           location.href = "/logout/";
+                    }
+                }
+              });
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <div id="container">
+        <div id="left_pane">
+            <div id="navigator">
+                {% for entry_type in entrys%}
+                <h3>{{entry_type}}</h3>
+                <div>
+                    <ul>
+                        {% for entry in entrys[entry_type] %}
+                        <li> <a href="#" class="entry" id="{{entry}}"> {{entrys[entry_type][entry]}}</a></li>
+                        {% end %}
+                    </ul>
+                </div>
+                {% end %}
+            </div>
+            <div>
+            <a id="exitBtn" href="#" stype="width:100%" style="display: block; width: 100%;height: 38px; background: #4E9CAF;padding: 10px;text-align: center;border-radius: 5px;color: white; font-weight: bold;"> 退出</a>
+            </div>
+        </div>
+        <div id="right_pane">
+            <div id="content">
+                <h3 id="module_name">我的设置</h3>
+                <div>
+                    {% block entry %} {% end %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="dialog-confirm" title="确认", stype="visibility:hidden;">
+         <p>确定要退出吗?</p>
+   </div>
+</body>
+
+</html>

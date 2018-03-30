@@ -1,0 +1,90 @@
+<form action="/playerids/list" method="post">
+     {% module xsrf_form_html() %}
+<div class="panel-body">
+  <div class="input-group">
+    <span class="input-group-addon">Player ID</span>
+    <input id="playerid" type="text" class="form-control form-text" placeholder="Player ID" value="{{playerid}}"/>
+  </div>
+  <br/>
+  <div class="input-group">
+  <span class="input-group-addon">My ID</span>
+  <input id="playerinvitecode" type="text" class="form-control form-text" placeholder="My ID" value="{{invitecode}}"/>
+  </div>
+  <br/>
+  <div class="input-group">
+  <span class="input-group-addon">Player Name</span>
+  <input id="playername" type="text"  readonly class="form-control form-text" placeholder="" value="{{playername}}"/>
+  </div>
+    <br/>
+  <div class="input-group">
+  <span class="input-group-addon">Player Friends</span>
+  <input id="playerfriends" type="text"  readonly class="form-control form-text" placeholder="" value="{{friends}}"/>
+  </div>
+    <br/>
+  <div class="input-group">
+  <span class="input-group-btn">
+    <button id="player_search" class="btn btn-default" data-url="/playerids/list" type="button">GET</button>
+  </span>
+  </div>
+</div>
+</form>
+
+<table id="players_pay" class="table datatable table-striped table-bordered">
+  <caption>Player's Payment record</caption>
+  <thead>
+    <tr>
+      <th data-type="string">Platform</th>
+      <th data-type="string">Transaction Id</th>
+      <th data-type="string">Product Id</th>
+      <th data-type="number">Quantity</th>
+      <th data-type="string">Purchased Time</th>
+      <th data-type="string">Retry Times</th>
+      <th data-type="string">Status</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for r in payments %}
+      <tr>
+          <td>{{r["platform"]}}</td>
+          <td>{{r["transaction_id"]}}</td>
+          <td>{{r["product_id"]}}</td>
+          <td>{{r["quantity"]}}</td>
+          <td>{{r["purchased_at"]}}</td>
+          <td>{{r["retry"]}}</td>
+          <td>{% if str(r["status"]) == "1" %}fail{% else %}success{% end %}</td>
+      </tr>
+  {% end %}
+  </tbody>
+</table>
+<table id="players_table" class="table datatable table-striped table-bordered">
+  <caption>Player's Ruby Change History</caption>
+  <thead>
+    <tr>
+      <th data-type="number">Operation</th>
+      <th data-type="number">Ruby</th>
+      <th data-type="number">Pay Ruby</th>
+      <th data-type="number">Ruby Change</th>
+      <th data-type="number">Free Ruby Change</th>
+      <th data-type="number">Time</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for ruby in rubys %}
+      <tr>
+          <td>{{ruby[0]}}</td>
+          <td>{{ruby[1]}}</td>
+          <td>{{ruby[2]}}</td>
+          <td>{{ruby[3]}}</td>
+          <td>{{ruby[4]}}</td>
+          <td>{{datetime.datetime.fromtimestamp(ruby[5]).strftime("%Y-%m-%d %H:%M:%S")}}</td>
+      </tr>
+  {% end %}
+  </tbody>
+</table>
+<script>
+$('#player_search').click(function(){
+    current_module_url = $(this).attr('data-url') + "?playerid=" + $('#playerid').val() +
+                         "&playerinvitecode=" +  $('#playerinvitecode').val();
+    loadModule();
+});
+</script>

@@ -1,0 +1,97 @@
+<nav class="navbar navbar-default" role="navigation">
+  <ul class="nav navbar-nav nav-justified">
+  </ul>
+</nav>
+<table id="apl_table" class="table table-striped table-bordered">
+  <thead>
+    <tr>
+      <th>channel</th>
+      <th>版本</th>
+      <th>是否开启</th>
+      <th>操作</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for u in adm_apl %}
+      <tr>
+          <td>{{u.apl_id}}</td>
+          <td>{{u.version}}</td>
+          <td>{%if u.opened == 0%}未生效{% end%}{%if u.opened == 1%}生效中{% end%}</td>
+          <td>
+              <button type="button" apl_id="{{u.apl_id}}"
+                 version="{{u.version}}"
+                 opened="{{u.opened}}"
+                 class="btn apleditbtn text-danger btn-primary"><i class="icon-edit"></i></button>
+         </td>
+     </tr>
+  {% end %}
+  </tbody>
+</table>
+<div id="dlgaddapl" class="modal fade">
+<div class="modal-dialog">
+  <div class="modal-content">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">关闭</span></button>
+      <h4 class="modal-title">APL设置</h4>
+    </div>
+    <div class="modal-body">
+        <form id="apl_add_form" action="/apl/save" method="post">
+           {% module xsrf_form_html() %}
+            <div class="input-group">
+                <span class="input-group-addon"><i class="icon-tasks"></i> channel </span>
+                <input name="apl_id" type="text" class="form-control" readonly placeholder="channel_id" />
+            </div>
+            <br/>
+            <div class="input-group">
+                <span class="input-group-addon"><i class="icon-flag"></i> 版本号</span>
+                <input name="version" type="text" class="form-control" placeholder="版本号" />
+            </div>
+            <br/>
+            <div class="input-group">
+                <span class="input-group-addon"><i class="icon-flag"></i> 生效</span>
+                <input name="opened" type="checkbox" class="form-control" placeholder="" value="1"/>
+            </div>
+        </form>
+        <div id="aplalert" class="alert alert-danger">全部内容不能为空！</div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+      <button type="button" class="btn btn-primary" id="btnSaveApl">保存</button>
+    </div>
+  </div>
+</div>
+</div>
+<script>
+$("#tmp_dlg").empty();
+$("#dlgaddapl").appendTo("#tmp_dlg");
+$('button.apleditbtn').click(function(){
+    var $btn = $(this);
+    $("#dlgaddapl").modal('toggle', 'center');
+    $('input[name="apl_id"]').val($btn.attr('apl_id'));
+    $('input[name="version"]').val($btn.attr('version'));
+    $('input[name="opened"]').prop('checked', $btn.attr('opened') == 1 );
+    $("#aplalert").text("全部内容不能为空！");
+});
+
+$("#btnSaveApl").on('click',function(e){
+    var $btn = $(this);
+    $('#actalert').text("全部内容不能为空！");
+    var postData = $("#apl_add_form").serializeArray();
+    var formURL = $("#apl_add_form").attr("action");
+    $("#dlgaddapl").modal('toggle', 'center');
+    $.ajax(
+    {
+            url : formURL,
+            type: "POST",
+            data : postData,
+            success:function(data, textStatus, jqXHR)
+            {
+               setTimeout(  "loadModule()", 500);
+            },
+            error: function(jqXHR, textStatus, errorThrown)
+            {
+            }
+    });
+});
+
+</script>

@@ -1,0 +1,29 @@
+<button id="mantupdateres" data-toggle="modal" data-target="#alertConfirmModel" mant_url="/mainten/updateres" type="button" class="mainten btn btn-primary btn-block" data-loading-text="processing...">更新资源</button>
+<button id="mantupdatecode" data-toggle="modal" data-target="#alertConfirmModel" mant_url="/mainten/updatecode" type="button" class="mainten btn btn-primary btn-block" data-loading-text="processing...">更新服务器代码</button>
+<button id="mantrestart" data-toggle="modal" data-target="#alertConfirmModel"  mant_url="/mainten/restart" type="button" class="mainten btn btn-primary btn-block" data-loading-text="processing...">重启服务器</button>
+<button id="mantmaint" data-toggle="modal" data-target="#alertConfirmModel"  mant_url="/mainten/maint" type="button" class="mainten btn btn-primary btn-block" data-loading-text="processing...">{%if maint %}关闭维护{%else%}开启维护{%end%}</button>
+<div id="mantinfo" class="alert alert-info"></div>
+<script>
+$('button.mainten').click(function(){
+    del_confirm_url = $(this).attr('mant_url');
+    del_confirm_id = "";
+    msg_data = $(this).text();
+    var $btn = $(this);
+    del_confirm_success = function(data){
+        $btn.button('reset');
+        data=data.replace(new RegExp('\r?\n','g'), '<br />');
+        $("#mantinfo").html("["+msg_data+"]操作直行完成"+ "<br/>"+ data);
+        if($btn.attr("id")=="mantmaint"){
+            setTimeout("loadModule()", 500);
+        }
+    };
+    del_confirm_start = function(darta){
+        $btn.button('loading');
+    }
+    del_confirm_error = function(data){
+        $btn.button('reset');
+        $("#mantinfo").text("["+msg_data+"]操作直行失败");
+    }
+    $("#confirm_msg").text("确认直行["+msg_data+"]操作吗？");
+});
+</script>

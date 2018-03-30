@@ -1,0 +1,214 @@
+<div class="panel-body">
+  <div class="input-group">
+    <span class="input-group-addon">Player ID</span>
+    <input id="playerid" type="text" class="form-control form-text" placeholder="Player ID" value="{{playerid}}"/>
+    <span class="input-group-btn">
+        <button id="player_search" class="btn btn-default" data-url="/playercommands/list" type="button">GET</button>
+    </span>
+  </div>
+</div>
+{% if datas %}
+<div class="panel-body">
+  <div class="input-group">
+    <span class="input-group-addon">Commands</span>
+    <select class="form-control" id="player_commands">
+      <option value="AddCurrency">AddCurrency</option>
+      <option value="AddCoin">AddCoin</option>
+      <option value="AddEnergy">AddEnergy</option>
+      <option value="AddTileClear">AddTileClear</option>
+      <option value="AddInstaBomb">AddInstaBomb</option>
+      <option value="AddBrush">AddBrush</option>
+      <option value="SetCurrency">SetCurrency</option>
+      <option value="SetCoin">SetCoin</option>
+      <option value="SetEnergy">SetEnergy</option>
+      <option value="SetTileClear">SetTileClear</option>
+      <option value="SetInstaBomb">SetInstaBomb</option>
+      <option value="SetBrush">SetBrush</option>
+      <option value="ResetSelect">ResetSelect</option>
+      <option value="ResetPlayer">ResetPlayer</option>
+    </select>
+    <span class="input-group-addon">Value</span>
+    <input id="command_value" type="text" class="form-control form-text" placeholder="value" value=""/>
+    <span class="input-group-btn">
+        <button id="player_createcommand" class="btn btn-default" type="button">Create Command</button>
+        <button id="player_savecommand" class="btn btn-default" type="button">Save Command</button>
+    </span>
+  </div>
+</div>
+
+<ul id="playertabs" class="nav nav-tabs">
+  <li class="active"><a data-tab href="#tabContent1">Pending</a></li>
+  <li><a data-tab href="#tabContent2">Completed</a></li>
+</ul>
+<div class="tab-content">
+  <div class="tab-pane active" id="tabContent1">
+  <table id="players_pendingd" class="table datatable table-striped table-bordered">
+  <thead>
+    <tr>
+      <th data-type="number">Command</th>
+      <th data-type="number">Args</th>
+      <th data-type="number">Created</th>
+      <th data-type="number">Delete</th>
+    </tr>
+  </thead>
+  <tbody id="pending_list">
+  {% for item in commands.get("data",[]) %}
+    {% if not item["success"] %}
+     <tr data-id="{{item["id"]}}">
+         <td>{{item["name"]}}</td>
+         <td>{{json_encode(item["args"])}}</td>
+         <td>{{datetime.datetime.utcfromtimestamp(int(item["created_at"])).strftime("%Y-%m-%d %H:%M:%S")}}&nbsp;UTC</td>
+         <td></td>
+     </tr>      
+    {% end %}
+  {% end %}
+  </tbody>
+  </table>
+  </div>
+  <div class="tab-pane" id="tabContent2">
+  <table id="players_completed" class="table datatable table-striped table-bordered">
+  <thead>
+    <tr>
+      <th data-type="number">Command</th>
+      <th data-type="number">Args</th>
+      <th data-type="number">Created</th>
+      <th data-type="number">Completed</th>
+      <th data-type="number">Result</th>
+    </tr>
+  </thead>
+  <tbody id="complete_list">
+  {% for item in commands.get("data",[]) %}
+    {% if item["success"] %}
+     <tr data-id="{{item["id"]}}">
+         <td>{{item["name"]}}</td>
+         <td>{{json_encode(item["args"])}}</td>
+         <td>{{datetime.datetime.utcfromtimestamp(int(item["created_at"])).strftime("%Y-%m-%d %H:%M:%S")}}&nbsp;UTC</td>
+         <td>{{datetime.datetime.utcfromtimestamp(int(item["completed_at"])).strftime("%Y-%m-%d %H:%M:%S")}}&nbsp;UTC</td>
+         <td></td>
+     </tr>      
+    {% end %}
+  {% end %}
+  </tbody>
+  </table>
+  </div>
+</div>
+
+
+<div style="position: relative;">
+<div style="overflow-x:scroll;overflow-y:visible;">
+<table id="user_table" class="table datatable table-striped table-bordered">
+  <thead>
+    <tr>
+      <th data-type="string" style="width: 240px;">Player Data Fields</th>
+      <th data-type="string" style="white-space: nowrap;">Values</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% import base64 %}
+  {% for key,value  in datas.get("data",{}).iteritems() %}
+      <tr>
+          <td style="width: 240px;">{{key}}</td>
+          {% if key == "user_name" %}
+             <td style="white-space: nowrap;">{{value}} which is <span style="color:red">{{base64.b64decode(value)}}</span></td>
+          {% else %}
+             {% if isinstance(value, (str, unicode))  %}   
+             <td  style="white-space: nowrap;">{{value}}</td>
+             {% else %}
+             <td  style="white-space: nowrap;">{{json_encode(value)}}</td>
+             {% end %}
+          {% end%}
+      </tr>
+  {% end %}
+  </tbody>
+</table>
+</div>
+</div>
+{% end %}
+<script>
+$('#player_search').click(function(){
+    current_module_url = $(this).attr('data-url') + "?playerid=" + $('#playerid').val();
+    loadModule();
+});
+
+{% autoescape None %}
+{% if datas %}
+var commands ={{json_encode(commands)}}; 
+var newcommands = 0;	
+Date.prototype.format = function(format) //author: meizz
+{
+  var o = {
+    "M+" : this.getUTCMonth()+1, //month
+    "d+" : this.getUTCDate(),    //day
+    "h+" : this.getUTCHours(),   //hour
+    "m+" : this.getUTCMinutes(), //minute
+    "s+" : this.getUTCSeconds(), //second
+    "q+" : Math.floor((this.getUTCMonth()+3)/3),  //quarter
+    "S" : this.getUTCMilliseconds() //millisecond
+  }
+
+  if(/(y+)/.test(format)) format=format.replace(RegExp.$1,
+    (this.getUTCFullYear()+"").substr(4 - RegExp.$1.length));
+  for(var k in o)if(new RegExp("("+ k +")").test(format))
+    format = format.replace(RegExp.$1,
+      RegExp.$1.length==1 ? o[k] :
+        ("00"+ o[k]).substr((""+ o[k]).length));
+  return format;
+}
+
+$("#player_createcommand").click(function(){
+  if( $("#command_value").val() == ""){
+     var myModalTrigger = new $.zui.ModalTrigger({title:"info",custom:"Please input the command value!"});
+     myModalTrigger.show();
+     return;
+  }
+  $.post("/playercommands/create?command="+$("#player_commands").val() + "&value=" + $("#command_value").val(), function (json) {
+    commands.data.splice(0,0,json);
+    $("#pending_list").prepend('<tr data-id="'+ json.id +'"><td>'+json.name+'</td><td>'+ JSON.stringify(json.args) +'</td><td>'+new Date(json.created_at*1000).format("yyyy-MM-dd h:mm:ss")+'&nbsp;UTC</td><td><button data-id="'+ json.id +'" class="command-delete">DELETE</button></td></tr>')
+    newcommands += 1;
+    $('button[data-id="' + json.id  + '"]').click(function(e){
+      var self = $(e.target);
+      $('tr[data-id="'+ self.attr('data-id') +'"]').remove();
+      newcommands -= 1;
+      var index = -1
+      $.each(commands, function(i, element) {
+        if(element.id ==  self.attr('data-id')){
+             index = i;
+        }
+      });
+      commands.data.splice(index, 1);
+    });
+  },"json");
+
+});
+
+$("#player_savecommand").click(function(){
+   if(newcommands <= 0){
+     var myModalTrigger = new $.zui.ModalTrigger({title:"info",custom:"Please create command first."});
+     myModalTrigger.show();
+      return;
+   }
+   var value =  JSON.stringify(commands);
+   del_confirm_url = "/playercommands/save?playerid={{playerid}}";
+   del_confirm_id  =  value;
+   del_confirm_success = function(data){
+     newcommands = 0;
+     $(".command-delete").remove();
+     var myModalTrigger = new $.zui.ModalTrigger({title:"info",custom:"Commands saved successful."});
+     myModalTrigger.show();
+   }
+   del_confirm_start = function(data){
+   
+   }
+   
+   del_confirm_error = function(data){
+     var myModalTrigger = new $.zui.ModalTrigger({title:"info",custom:"Commands saved failed."});
+     myModalTrigger.show();
+   }
+   $("#alert_conform_title").text("Confirm");
+   $("#confirm_msg").text("Are your confirm to save the commands?");
+   $("#alertConfirmModel").modal();
+});
+
+
+{% end %}
+</script>

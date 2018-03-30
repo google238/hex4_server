@@ -1,0 +1,6 @@
+.svn
+.git
+logs
+*.pyc
+mainten.txt
+activity.json

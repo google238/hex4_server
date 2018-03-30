@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block entry %}
+<div class="ui-widget">
+    <form id="formUser" action="#" method="post">
+        <div class="form-group">
+            <label for="username">用户名: {{current_user.pkey}}</label>
+        </div>
+        <div class="form-group">
+            <label for="password">密码:</label>
+            <input type="password" id="password" name="password" />
+        </div>
+        <br/>
+        <div class="form-group">
+            <label for="password_confirm">密码确认:</label>
+            <input type="password" id="password_confirm" name="password_confirm" />
+        </div>
+        <br/>
+        <div class="form-group">
+            <label for="email">邮件地址:</label>
+            <input type="text" id="email" name="email" value="{{current_user.email}}" />
+        </div>
+        <br/>
+        <div class="form-group">
+            <label for="email_confirm">邮件地址确认:</label>
+            <input type="text" id="email_confirm" name="email_confirm" value="{{current_user.email}}" />
+        </div>
+        <br/>
+        <button id="saveBtn" type="submit" class="btn btn-default">保存</button>
+    </form>
+    <script>
+        $(function() {
+            $("#formUser").validate({
+                // Specify validation rules
+                rules: {
+                    email: {
+                        required: true,
+                        email: true,
+                        equalTo: "#email_confirm"
+                    },
+                    password: {
+                        required: true,
+                        minlength: 5,
+                        equalTo: "#password_confirm"
+                    }
+                },
+                // Specify validation error messages
+                messages: {
+                    password: {
+                        required: "请提供密码",
+                        minlength: "密码至少需要5个字符",
+                        equalTo  : "两次输入的密码不一致"
+                    },
+                    email: {
+                        required: "请提供密码",
+                        minlength: "密码至少需要5个字符",
+                        equalTo  : "两次输入的email不一致"
+                    }
+                },
+                submitHandler: function(form) {
+                    form.submit();
+                }
+            });
+        });
+    </script>
+</div>
+{% end %}

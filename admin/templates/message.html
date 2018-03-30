@@ -1,0 +1,324 @@
+<nav class="navbar navbar-default" role="navigation">
+  <ul class="nav navbar-nav nav-justified">
+    <li><a href="#" class="icon-plus" class="btn " id="btnAddMsg" data-toggle="modal" data-target="#dlgaddmsg"> 添加</a></li>
+  </ul>
+</nav>
+<table id="msg_table" class="table table-striped table-bordered">
+  <thead>
+    <tr>
+      <th>id</th>
+      <th>消息类别</th>
+      <th>接收对象</th>
+      <th>是否全服</th>
+      <th>是否用户触发</th>
+      <th>状态</th>
+      <th>操作</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for u in adm_message %}
+      <tr>
+          <td>{{u.msgid}}</td>
+          <td>{{u.msgtype}}</td>
+          <td>{{u.target}}</td>
+          <td>{%if u.send_all == 0 %} 否{% else %} 是{% end %}</td>
+          <td>{%if u.self_invoke == 0 %} 否{% else %} 是{% end %}</td>
+          <td>{%if u.status == 0%}未开始{% end%}{%if u.status == 1%}进行中{% end%}{%if u.status == 2%}完成{% end%}</td>
+          <td>
+             {% if u.status == 0 %}
+              <button type="button" msgid="{{u.msgid}}"
+                 msgtype="{{u.msgtype}}"
+                 msgtarget="{{u.target}}"
+                 send_all="{{u.send_all}}"
+                 self_invoke="{{u.self_invoke}}"
+                 class="btn msgeditbtn text-danger btn-primary"><i class="icon-edit"></i></button>
+              &nbsp;&nbsp;&nbsp;
+              <button type="button" data-toggle="modal" data-target="#alertConfirmModel"  msgid="{{u.msgid}}" msg_url="/guestmsg/start" class="btn msgstartbtn btn-warning"><i class="icon-play"></i></button>
+             {% end %}
+             {% if u.status == 0 or u.status == 2 %}
+              &nbsp;&nbsp;&nbsp;
+              <button type="button" data-toggle="modal" data-target="#alertConfirmModel"  msgid="{{u.msgid}}" msg_url="/guestmsg/del" class="btn msgdelbtn btn-warning"><i class="icon-trash"></i></button>
+             {% end %}
+         </td>
+     </tr>
+  {% end %}
+  </tbody>
+</table>
+<div id="dlgaddmsg" class="modal fade">
+<div class="modal-dialog">
+  <div class="modal-content">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">关闭</span></button>
+      <h4 class="modal-title">发送消息</h4>
+    </div>
+    <div class="modal-body">
+        <form id="msg_add_form" action="/guestmsg/addcommit" method="post">
+           {% module xsrf_form_html() %}
+           <input id="msgid" name="msgid" type="hidden", value="-1"/>
+            <div class="input-group">
+                <span class="input-group-addon"><i class="icon-user"></i> 消息类别</span>
+                <select name="msgtype" class="form-control" placeholder="消息类别下拉选择" >
+                    <option value="corner_3">corner_3</option>
+                    <option value="corner_20">corner_20</option>
+                    <option value="corner_34">corner_34</option>
+                    <option value="corner_46">corner_46</option>
+                    <option value="corner_60">corner_60</option>
+                    <option value="corner_84">corner_84</option>
+                    <option value="corner_90">corner_90</option>
+                    <option value="corner_105">corner_105</option>
+                    <option value="corner_120">corner_120</option>
+                    <option value="AddCurrency">AddCurrency</option>
+                    <option value="AddCoin">AddCoin</option>
+                    <option value="AddEnergy">AddEnergy</option>
+                    <option value="Add_fp">Add_fp</option>
+                    <option value="AddTileClear">AddTileClear</option>
+                    <option value="AddInstaBomb">AddInstaBomb</option>
+                    <option value="AddBrush">AddBrush</option>
+                    <option value="AddTicket">AddTicket</option>
+                    <option value="survey_award">survey_award</option>
+                    <option value="SBS_down">SBS_down</option>
+                    <option value="friend_point">friend_point</option>
+<option value="fb_friend_point">fb_friend_point</option>
+<option value="facebook_login">facebook_login</option>
+<option value="puzzle_1011">puzzle_1011</option>
+<option value="puzzle_1012">puzzle_1012</option>
+<option value="puzzle_1021">puzzle_1021</option>
+<option value="puzzle_1022">puzzle_1022</option>
+<option value="puzzle_1031">puzzle_1031</option>
+<option value="puzzle_1032">puzzle_1032</option>
+<option value="puzzle_1041">puzzle_1041</option>
+<option value="puzzle_1042">puzzle_1042</option>
+<option value="puzzle_1051">puzzle_1051</option>
+<option value="puzzle_1052">puzzle_1052</option>
+<option value="puzzle_2011">puzzle_2011</option>
+<option value="puzzle_2012">puzzle_2012</option>
+<option value="puzzle_2013">puzzle_2013</option>
+<option value="puzzle_2014">puzzle_2014</option>
+<option value="puzzle_2015">puzzle_2015</option>
+<option value="puzzle_2021">puzzle_2021</option>
+<option value="puzzle_2022">puzzle_2022</option>
+<option value="puzzle_2023">puzzle_2023</option>
+<option value="puzzle_2024">puzzle_2024</option>
+<option value="puzzle_2025">puzzle_2025</option>
+<option value="puzzle_2031">puzzle_2031</option>
+<option value="puzzle_2032">puzzle_2032</option>
+<option value="puzzle_2033">puzzle_2033</option>
+<option value="puzzle_2034">puzzle_2034</option>
+<option value="puzzle_2035">puzzle_2035</option>
+<option value="puzzle_2041">puzzle_2041</option>
+<option value="puzzle_2042">puzzle_2042</option>
+<option value="puzzle_2043">puzzle_2043</option>
+<option value="puzzle_2044">puzzle_2044</option>
+<option value="puzzle_2045">puzzle_2045</option>
+<option value="puzzle_2051">puzzle_2051</option>
+<option value="puzzle_2052">puzzle_2052</option>
+<option value="puzzle_2053">puzzle_2053</option>
+<option value="puzzle_2054">puzzle_2054</option>
+<option value="puzzle_2055">puzzle_2055</option>
+<option value="puzzle_2991">puzzle_2991</option>
+<option value="puzzle_2992">puzzle_2992</option>
+<option value="checkInActivity_1">checkInActivity_1</option>
+<option value="checkInActivity_2">checkInActivity_2</option>
+<option value="checkInActivity_3">checkInActivity_3</option>
+<option value="checkInActivity_4">checkInActivity_4</option>
+<option value="checkInActivity_5">checkInActivity_5</option>
+<option value="checkInActivity_6">checkInActivity_6</option>
+<option value="checkInActivity_7">checkInActivity_7</option>
+<option value="checkInActivity_8">checkInActivity_8</option>
+<option value="be_invite_success">be_invite_success</option>
+<option value="invite_success_1">invite_success_1</option>
+<option value="invite_success_2">invite_success_2</option>
+<option value="invite_success_3">invite_success_3</option>
+<option value="invite_success_4">invite_success_4</option>
+<option value="event_invite_success_2">event_invite_success_2</option>
+<option value="event_invite_success_4">event_invite_success_4</option>
+<option value="event_invite_success_10">event_invite_success_10</option>
+<option value="event_invite_success_40">event_invite_success_40</option>
+<option value="Add_fp">Add_fp</option>
+<option value="invite_everytime_1">invite_everytime_1</option>
+<option value="invite_everytime_2">invite_everytime_2</option>
+<option value="mail_obt_gift">mail_obt_gift</option>
+<option value="mail_first_week_gift">mail_first_week_gift</option>
+<option value="mail_30w_gift_1">mail_30w_gift_1</option>
+<option value="mail_30w_gift_2">mail_30w_gift_2</option>
+<option value="mail_network_down_1">mail_network_down_1</option>
+<option value="mail_network_down_2">mail_network_down_2</option>
+<option value="mail_40w_gift_1">mail_40w_gift_1</option>
+<option value="mail_40w_gift_2">mail_40w_gift_2</option>
+<option value="mail_50w_gift_1">mail_50w_gift_1</option>
+<option value="mail_50w_gift_2">mail_50w_gift_2</option>
+<option value="puzzle_share_991">puzzle_share_991</option>
+<option value="puzzle_share_992">puzzle_share_992</option>
+<option value="mail_70w_gift_1">mail_70w_gift_1</option>
+<option value="mail_70w_gift_2">mail_70w_gift_2</option>
+<option value="corner_181">corner_181</option>
+<option value="corner_198">corner_198</option>
+<option value="corner_214">corner_214</option>
+<option value="corner_225">corner_225</option>
+<option value="corner_240">corner_240</option>
+<option value="puzzle_share_11">puzzle_share_11</option>
+<option value="puzzle_share_12">puzzle_share_12</option>
+<option value="puzzle_share_13">puzzle_share_13</option>
+<option value="puzzle_share_14">puzzle_share_14</option>
+<option value="puzzle_share_15">puzzle_share_15</option>
+<option value="puzzle_share_21">puzzle_share_21</option>
+<option value="puzzle_share_22">puzzle_share_22</option>
+<option value="puzzle_share_23">puzzle_share_23</option>
+<option value="puzzle_share_24">puzzle_share_24</option>
+<option value="puzzle_share_25">puzzle_share_25</option>
+<option value="puzzle_share_31">puzzle_share_31</option>
+<option value="puzzle_share_32">puzzle_share_32</option>
+<option value="puzzle_share_33">puzzle_share_33</option>
+<option value="puzzle_share_34">puzzle_share_34</option>
+<option value="puzzle_share_35">puzzle_share_35</option>
+<option value="puzzle_share_41">puzzle_share_41</option>
+<option value="puzzle_share_42">puzzle_share_42</option>
+<option value="puzzle_share_43">puzzle_share_43</option>
+<option value="puzzle_share_44">puzzle_share_44</option>
+<option value="puzzle_share_45">puzzle_share_45</option>
+<option value="mail_weekend_delay">mail_weekend_delay</option>
+<option value="puzzle_share_981">puzzle_share_981</option>
+<option value="puzzle_share_982">puzzle_share_982</option>
+<option value="eventLogin">eventLogin</option>
+<option value="puzzle_2981">puzzle_2981</option>
+<option value="puzzle_2982">puzzle_2982</option>
+<option value="mail_80w_gift_1">mail_80w_gift_1</option>
+<option value="mail_80w_gift_2">mail_80w_gift_2</option>
+<option value="1000_ticket">1000_ticket</option>
+<option value="2000_ticket">2000_ticket</option>
+<option value="3000_ticket">3000_ticket</option>
+<option value="4000_ticket">4000_ticket</option>
+<option value="5000_ticket">5000_ticket</option>
+<option value="theme1_ticket">theme1_ticket</option>
+<option value="theme2_ticket">theme2_ticket</option>
+<option value="theme3_ticket">theme3_ticket</option>
+<option value="theme4_ticket">theme4_ticket</option>
+<option value="chris_ticket">chris_ticket</option>
+<option value="puzzle_share_971">puzzle_share_971</option>
+<option value="puzzle_share_972">puzzle_share_972</option>
+<option value="puzzle_share_973">puzzle_share_973</option>
+<option value="puzzle_share_974">puzzle_share_974</option>
+<option value="puzzle_2971">puzzle_2971</option>
+<option value="puzzle_2972">puzzle_2972</option>
+<option value="puzzle_2973">puzzle_2973</option>
+<option value="puzzle_2974">puzzle_2974</option>
+<option value="chris_socks">chris_socks</option>
+<option value="newyear_1000">newyear_1000</option>
+<option value="newyear_2000">newyear_2000</option>
+<option value="newyear_3000">newyear_3000</option>
+<option value="newyear_4000">newyear_4000</option>
+<option value="newyear_5000">newyear_5000</option>
+<option value="official_shirokuma">official_shirokuma</option>
+<option value="gacha_sale_gift_ticket">gacha_sale_gift_ticket</option>
+<option value="puzzle_share_961">puzzle_share_961</option>
+<option value="puzzle_share_962">puzzle_share_962</option>
+<option value="puzzle_2961">puzzle_2961</option>
+<option value="puzzle_2962">puzzle_2962</option>
+<option value="mail_chris_gift">mail_chris_gift</option>
+<option value="mail_new_year_gift">mail_new_year_gift</option>
+<option value="mail_new_year_loss">mail_new_year_loss</option>
+<option value="head_icon_mountain">head_icon_mountain</option>
+<option value="june_head_1">june_head_1</option>
+                </select>
+            </div>
+            <br/>
+            <div class="input-group">
+                <span class="input-group-addon"><i class="icon-gift"></i> 接收用户</span>
+                <input name="target" type="text" class="form-control" placeholder="用户id" />
+            </div>
+            <br/>
+            <div class="input-group">
+                <span class="input-group-addon"><i class="icon-server"></i> 全服发送</span>
+                <input name="send_all" type="checkbox" class="form-control" value＝"1" />
+            </div>
+            <div class="input-group">
+                <span class="input-group-addon"><i class="icon-cloud-download"></i> 用户触发</span>
+                <input name="self_invoke" type="checkbox" class="form-control" checked value＝"1" />
+            </div>
+        </form>
+        <div id="msgalert" class="alert alert-danger">请至少先择一个消息类别！</div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+      <button type="button" class="btn btn-primary" id="btnAddMsgCommit">保存</button>
+    </div>
+  </div>
+</div>
+</div>
+<script>
+$("#btnAddMsgCommit").on('click',function(e){
+    var $btn = $(this);
+    var postData = $("#msg_add_form").serializeArray();
+    var formURL = $("#msg_add_form").attr("action");
+    if($('input[name="msgtype"]').val() == ""){
+         e.preventDefault();
+         $('#msgalert').text("请至少先择一个消息类别!");
+         return;
+    }
+    $('#btnAddMsg').click();
+
+    $.ajax(
+    {
+            url : formURL,
+            type: "POST",
+            data : postData,
+            success:function(data, textStatus, jqXHR)
+            {
+               setTimeout(  "loadModule()", 500);
+            },
+            error: function(jqXHR, textStatus, errorThrown)
+            {
+            }
+    });
+});
+$("#tmp_dlg").empty();
+$("#dlgaddmsg").appendTo("#tmp_dlg");
+$('button.msgdelbtn').click(function(){
+    del_confirm_url = $(this).attr('msg_url');
+    del_confirm_id = $(this).attr('msgid');
+    del_confirm_success = function(data){
+       setTimeout("loadModule()", 500);
+    }
+    del_confirm_start = function(data){
+    }
+    del_confirm_error = function(data){
+    }
+    $("#confirm_msg").text("确认删除当前消息吗？");
+});
+
+$('button.msgstartbtn').click(function(){
+    del_confirm_url = $(this).attr('msg_url');
+    del_confirm_id = $(this).attr('msgid');
+    del_confirm_success = function(data){
+       setTimeout("loadModule()", 500);
+    }
+    del_confirm_start = function(data){
+    }
+    del_confirm_error = function(data){
+    }
+    $("#confirm_msg").text("确认启动消息发送吗,这个是不可逆的？");
+});
+
+$('button.msgeditbtn').click(function(){
+    var $btn = $(this);
+    $('#btnAddMsg').click();
+    $('input[name="msgid"]').val($btn.attr('msgid'));
+    var select_type =  $btn.attr('msgtype');
+    $('option[value="'+ select_type +'"]').prop('selected', true);
+    $('input[name="target"]').val($btn.attr('msgtarget'));
+    $('input[name="send_all"]').prop('checked',$btn.attr('send_all')=="1");
+    $('input[name="self_invoke"]').prop('checked',$btn.attr('self_invoke')=="1");
+    if($btn.attr('send_all')=="1")
+       $('input[name="self_invoke"]').attr('disabled','disabled');
+});
+
+$('input[name="send_all"]').change(function(){
+    if ($(this).is(':checked')) {
+       $('input[name="self_invoke"]').removeAttr('disabled').focus();
+    }else{
+       $('input[name="self_invoke"]').prop('checked',false);
+       $('input[name="self_invoke"]').attr('disabled','disabled');
+    }
+});
+
+</script>

@@ -1,0 +1,2 @@
+REVIEWBOARD_URL = 'http://119.29.21.115/review/'
+REPOSITORY = 'SBS'
